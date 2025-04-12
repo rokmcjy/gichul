@@ -34,7 +34,7 @@ function showMain() {
   showAnswersBtn.style.display = 'none';
   navButtons.style.display = 'none';
 
-  const years = [2024, 2023, 2022, 2021, 2020];
+  const years = [2024]; // ✅ 이제 2024년만 고정
   years.forEach(year => {
     const btn = document.createElement('button');
     btn.textContent = `${year}년도`;
