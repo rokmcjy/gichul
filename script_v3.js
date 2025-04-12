@@ -50,6 +50,8 @@ function showSubjects(year) {
   currentYear = year;
   yearSelect.innerHTML = '';
   subjectSelect.innerHTML = '';
+  questionBox.innerHTML = '';
+  allAnswersBox.innerHTML = '';
 
   Object.entries(subjects).forEach(([code, name]) => {
     const btn = document.createElement('button');
@@ -58,6 +60,10 @@ function showSubjects(year) {
     btn.onclick = () => loadProblems(year, code);
     subjectSelect.appendChild(btn);
   });
+
+  backToMainBtn.style.display = 'inline-block';
+  showAnswersBtn.style.display = 'none';
+  navButtons.style.display = 'none';
 }
 
 // 문제 로드
@@ -70,6 +76,7 @@ async function loadProblems(year, subjectCode) {
     currentQuestionIndex = 0;
     wrongAnswers = [];
     score = 0;
+    subjectSelect.innerHTML = '';
     showQuestion();
   } catch (error) {
     alert(error.message);
@@ -124,6 +131,9 @@ function selectAnswer(selected) {
   buttons[problem.answer - 1].classList.add('correct');
 }
 
+// 전역 등록
+window.selectAnswer = selectAnswer;
+
 // 다음 문제
 nextQuestionBtn.onclick = () => {
   currentQuestionIndex++;
@@ -138,7 +148,7 @@ prevQuestionBtn.onclick = () => {
   }
 };
 
-// 전체 정답 보기 (오답노트 보기로 변환)
+// 전체 정답 보기 (오답노트)
 showAnswersBtn.onclick = () => {
   allAnswersBox.innerHTML = `
     <h2>📝 오답노트</h2>
