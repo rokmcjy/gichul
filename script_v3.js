@@ -1,13 +1,12 @@
-let problemsData = {};
+let problemsData = [];
 let currentQuestions = [];
 let currentIndex = 0;
 
-// ✅ JSON 파일 절대경로 fetch
+// ✅ 문제 데이터 불러오기
 async function loadProblems(year) {
-  const baseUrl = 'https://rokmcjy.github.io/gichul';  // 너 깃허브 주소
+  const baseUrl = 'https://rokmcjy.github.io/gichul';
   try {
     const res = await fetch(`${baseUrl}/problems/${year}.json`);
-
     console.log('✅ fetch 응답 상태:', res.status);
     console.log('✅ fetch 응답 OK?:', res.ok);
 
@@ -19,11 +18,11 @@ async function loadProblems(year) {
     console.log('✅ 불러온 problemsData:', problemsData);
   } catch (error) {
     console.error('❌ fetch 오류 발생:', error);
-    problemsData = []; // 실패 시 빈 배열로 초기화
+    problemsData = [];
   }
 }
 
-// ✅ 과목 리스트 표시
+// ✅ 과목 버튼 렌더링
 function renderSubjects() {
   const subjectDiv = document.getElementById('subject-select');
   subjectDiv.innerHTML = '';
@@ -41,23 +40,25 @@ function renderSubjects() {
     subjectDiv.appendChild(btn);
   });
 
-  subjectDiv.style.display = 'block'; // 혹시 숨겨져 있던거 다시 보이게
+  subjectDiv.style.display = 'block';
 }
 
-// ✅ 과목 선택 → 문제풀이 시작
+// ✅ 퀴즈 시작
 function startQuiz(subject) {
   currentQuestions = problemsData.filter(p => p.subject === subject);
   currentIndex = 0;
+
   document.getElementById('year-select').style.display = 'none';
   document.getElementById('subject-select').style.display = 'none';
   document.getElementById('back-to-main').style.display = 'block';
   document.getElementById('show-answers').style.display = 'block';
   document.getElementById('nav-buttons').style.display = 'flex';
   document.getElementById('all-answers').innerHTML = '';
+
   renderQuestion();
 }
 
-// ✅ 문제 하나 표시
+// ✅ 문제 렌더링
 function renderQuestion() {
   const questionBox = document.getElementById('question-box');
   if (currentIndex < 0) currentIndex = 0;
@@ -65,6 +66,7 @@ function renderQuestion() {
     questionBox.innerHTML = "<h3>문제풀이 완료!</h3>";
     return;
   }
+
   const q = currentQuestions[currentIndex];
   const numbers = ["①", "②", "③", "④", "⑤"];
 
@@ -106,7 +108,7 @@ function showAllAnswers() {
   `).join('<br>');
 }
 
-// ✅ 메인화면으로 돌아가기
+// ✅ 메인으로 돌아가기
 function backToMain() {
   document.getElementById('year-select').style.display = 'block';
   document.getElementById('year-select').innerHTML = '';
@@ -148,23 +150,19 @@ function renderYearSelect() {
   [2023, 2024].forEach(year => {
     const btn = document.createElement('button');
     btn.innerText = `${year}년도`;
-
-    // ✅ 버튼 클릭할 때 문제 불러오기
     btn.onclick = async () => {
       await loadProblems(year);
       renderSubjects();
     };
-
     yearDiv.appendChild(btn);
   });
 
   yearDiv.style.display = 'block';
 }
 
-// ✅ 문서 로딩 완료 후 실행
-document.addEventListener('DOMContentLoaded', () => {
+// ✅ DOMContentLoaded 이벤트 등록 (문서 완전히 로드된 후 시작)
+window.addEventListener('DOMContentLoaded', () => {
   renderYearSelect();
-
   document.getElementById('show-answers').onclick = showAllAnswers;
   document.getElementById('back-to-main').onclick = backToMain;
   document.getElementById('next-question').onclick = nextQuestion;
