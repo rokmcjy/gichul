@@ -1,173 +1,176 @@
-document.addEventListener('DOMContentLoaded', function() {
-  const app = document.getElementById('app');
-  const yearSelect = document.getElementById('year-select');
-  const subjectSelect = document.getElementById('subject-select');
-  const questionBox = document.getElementById('question-box');
-  const backToMainBtn = document.getElementById('back-to-main');
-  const showAnswersBtn = document.getElementById('show-answers');
-  const navButtons = document.getElementById('nav-buttons');
-  const prevQuestionBtn = document.getElementById('prev-question');
-  const nextQuestionBtn = document.getElementById('next-question');
-  const allAnswersBox = document.getElementById('all-answers');
+// script_v4.5.js
 
-  let currentYear = '';
-  let currentSubject = '';
-  let problems = [];
-  let currentQuestionIndex = 0;
-  let wrongAnswers = [];
-  let score = 0;
+const app = document.getElementById('app');
+const yearSelect = document.getElementById('year-select');
+const subjectSelect = document.getElementById('subject-select');
+const questionBox = document.getElementById('question-box');
+const buttons = document.getElementById('buttons');
+const navButtons = document.getElementById('nav-buttons');
+const backToMainBtn = document.getElementById('back-to-main');
+const showAnswersBtn = document.getElementById('show-answers');
+const prevQuestionBtn = document.getElementById('prev-question');
+const nextQuestionBtn = document.getElementById('next-question');
+const allAnswersDiv = document.getElementById('all-answers');
 
-  const subjects = {
-    "mlaw": "민법 및 민사특별법",
-    "gongron": "부동산학개론",
-    "gongbeop": "부동산공법",
-    "sebub": "부동산세법",
-    "junggae": "부동산공시법 및 중개실무"
-  };
+let problemsData = [];
+let currentYear = '';
+let currentSubject = '';
+let currentQuestionIndex = 0;
+let score = 0;
+let wrongAnswers = [];
 
-  function showMain() {
-    yearSelect.innerHTML = '';
-    subjectSelect.innerHTML = '';
-    questionBox.innerHTML = '';
-    allAnswersBox.innerHTML = '';
-    backToMainBtn.style.display = 'none';
-    showAnswersBtn.style.display = 'none';
-    navButtons.style.display = 'none';
-
-    const years = [2024];
-    years.forEach(year => {
-      const btn = document.createElement('button');
-      btn.textContent = `${year}년도`;
-      btn.className = 'year-btn';
-      btn.onclick = () => showSubjects(year);
-      yearSelect.appendChild(btn);
-    });
+async function loadProblems(year) {
+  try {
+    const response = await fetch(`problems/${year}.json`);
+    if (!response.ok) throw new Error('문제 파일을 불러올 수 없습니다.');
+    const data = await response.json();
+    problemsData = data;
+    showSubjectSelect();
+  } catch (error) {
+    console.error('fetch 오류 발생:', error);
+    alert('문제를 불러올 수 없습니다.');
   }
+}
 
-  function showSubjects(year) {
-    currentYear = year;
-    yearSelect.innerHTML = '';
-    subjectSelect.innerHTML = '';
-    questionBox.innerHTML = '';
-    allAnswersBox.innerHTML = '';
+function showYearSelect() {
+  yearSelect.innerHTML = '';
+  subjectSelect.innerHTML = '';
+  questionBox.innerHTML = '';
+  buttons.style.display = 'none';
+  navButtons.style.display = 'none';
+  allAnswersDiv.innerHTML = '';
 
-    Object.entries(subjects).forEach(([code, name]) => {
-      const btn = document.createElement('button');
-      btn.textContent = name;
-      btn.className = 'subject-btn';
-      btn.onclick = () => loadProblems(year, code);
-      subjectSelect.appendChild(btn);
-    });
+  const availableYears = ['2020', '2021', '2022', '2023', '2024']; // 여기에 있는 연도만 표시
+  availableYears.forEach(year => {
+    const btn = document.createElement('button');
+    btn.textContent = `${year}년도`;
+    btn.onclick = () => {
+      currentYear = year;
+      loadProblems(year);
+    };
+    yearSelect.appendChild(btn);
+  });
+}
 
-    backToMainBtn.style.display = 'inline-block';
-    showAnswersBtn.style.display = 'none';
-    navButtons.style.display = 'none';
-  }
+function showSubjectSelect() {
+  yearSelect.innerHTML = '';
+  subjectSelect.innerHTML = '';
+  questionBox.innerHTML = '';
+  buttons.style.display = 'none';
+  navButtons.style.display = 'none';
+  allAnswersDiv.innerHTML = '';
 
-  async function loadProblems(year, subjectCode) {
-    try {
-      const response = await fetch(`/gichul/problems/${year}_${subjectCode}_full.json`);
-      if (!response.ok) throw new Error('문제 파일을 불러올 수 없습니다.');
-      problems = await response.json();
-      currentSubject = subjectCode;
+  const subjects = [...new Set(problemsData.map(p => p.subject))];
+  subjects.forEach(subject => {
+    const btn = document.createElement('button');
+    btn.textContent = subject;
+    btn.onclick = () => {
+      currentSubject = subject;
       currentQuestionIndex = 0;
-      wrongAnswers = [];
       score = 0;
-      subjectSelect.innerHTML = '';
+      wrongAnswers = [];
       showQuestion();
-    } catch (error) {
-      alert(error.message);
-    }
+    };
+    subjectSelect.appendChild(btn);
+  });
+
+  backToMainBtn.style.display = 'inline-block';
+  showAnswersBtn.textContent = '오답노트 보기';
+  showAnswersBtn.style.display = 'inline-block';
+}
+
+function showQuestion() {
+  const subjectProblems = problemsData.filter(p => p.subject === currentSubject);
+  if (currentQuestionIndex >= subjectProblems.length) {
+    showScore();
+    return;
   }
 
-  function showQuestion() {
-    if (currentQuestionIndex >= problems.length) {
-      showResult();
-      return;
+  const problem = subjectProblems[currentQuestionIndex];
+  questionBox.innerHTML = `
+    <h2>Q${currentQuestionIndex + 1}. ${problem.question}</h2>
+    ${problem.choices.map((choice, index) => `
+      <button class="choice" onclick="checkAnswer(${index + 1})">${index + 1}. ${choice}</button>
+    `).join('')}
+    <div id="explanation" class="explanation"></div>
+  `;
+
+  buttons.style.display = 'block';
+  navButtons.style.display = 'block';
+}
+
+function checkAnswer(selected) {
+  const subjectProblems = problemsData.filter(p => p.subject === currentSubject);
+  const problem = subjectProblems[currentQuestionIndex];
+  const allChoices = document.querySelectorAll('.choice');
+  allChoices.forEach((btn, idx) => {
+    btn.disabled = true;
+    if (idx + 1 === problem.answer) {
+      btn.classList.add('correct');
+    } else if (idx + 1 === selected) {
+      btn.classList.add('wrong');
     }
+  });
 
-    const problem = problems[currentQuestionIndex];
-    questionBox.innerHTML = `
-      <div class="question">
-        <h2>Q${currentQuestionIndex + 1}. ${problem.question}</h2>
-        <div class="choices" id="choices-container"></div>
-      </div>
-    `;
+  const explanationDiv = document.getElementById('explanation');
+  explanationDiv.innerHTML = `<strong>해설:</strong> ${problem.explanation}`;
 
-    const choicesContainer = document.getElementById('choices-container');
-    problem.choices.forEach((choice, idx) => {
-      const btn = document.createElement('button');
-      btn.textContent = `${idx + 1}. ${choice}`;
-      btn.className = 'choice-btn';
-      btn.addEventListener('click', () => selectAnswer(idx + 1)); // ✅ 여기 다시 정확히 연결
-      choicesContainer.appendChild(btn);
+  if (selected === problem.answer) {
+    score++;
+  } else {
+    wrongAnswers.push({
+      number: currentQuestionIndex + 1,
+      question: problem.question,
+      correctAnswer: `${problem.answer}. ${problem.choices[problem.answer - 1]}`,
+      explanation: problem.explanation
     });
+  }
+}
 
-    backToMainBtn.style.display = 'inline-block';
-    showAnswersBtn.style.display = 'inline-block';
-    showAnswersBtn.textContent = "📝 오답노트 보기";
-    navButtons.style.display = 'flex';
-    allAnswersBox.style.display = 'none';
+function showScore() {
+  questionBox.innerHTML = `<h2>총점: ${score}점 / ${problemsData.filter(p => p.subject === currentSubject).length}점</h2>`;
+  navButtons.style.display = 'none';
+}
+
+function showWrongAnswers() {
+  if (wrongAnswers.length === 0) {
+    allAnswersDiv.innerHTML = `<h3>오답노트</h3><p>모든 문제를 맞췄습니다!</p>`;
+    return;
   }
 
-  function selectAnswer(selected) {
-    const problem = problems[currentQuestionIndex];
-    const buttons = document.querySelectorAll('.choices button');
-    buttons.forEach(btn => btn.disabled = true);
+  allAnswersDiv.innerHTML = `
+    <h3>📚 오답노트</h3>
+    ${wrongAnswers.map(wrong => `
+      <div>
+        <strong>Q${wrong.number}. ${wrong.question}</strong><br>
+        정답: ${wrong.correctAnswer}<br>
+        해설: ${wrong.explanation}
+      </div><br>
+    `).join('')}
+  `;
+  subjectSelect.innerHTML = '';
+  questionBox.innerHTML = '';
+  buttons.style.display = 'block';
+  navButtons.style.display = 'none';
+}
 
-    if (selected === problem.answer) {
-      score++;
-    } else {
-      wrongAnswers.push({
-        question: problem.question,
-        selected: selected,
-        correct: problem.answer,
-        explanation: problem.explanation,
-        correctText: problem.choices[problem.answer - 1]
-      });
-    }
-
-    if (buttons[selected - 1]) {
-      buttons[selected - 1].classList.add(selected === problem.answer ? 'correct' : 'wrong');
-    }
-    if (buttons[problem.answer - 1]) {
-      buttons[problem.answer - 1].classList.add('correct');
-    }
+backToMainBtn.onclick = showYearSelect;
+showAnswersBtn.onclick = showWrongAnswers;
+prevQuestionBtn.onclick = () => {
+  if (currentQuestionIndex > 0) {
+    currentQuestionIndex--;
+    showQuestion();
   }
-
-  nextQuestionBtn.onclick = () => {
+};
+nextQuestionBtn.onclick = () => {
+  const subjectProblems = problemsData.filter(p => p.subject === currentSubject);
+  if (currentQuestionIndex < subjectProblems.length - 1) {
     currentQuestionIndex++;
     showQuestion();
-  };
+  } else {
+    showScore();
+  }
+};
 
-  prevQuestionBtn.onclick = () => {
-    if (currentQuestionIndex > 0) {
-      currentQuestionIndex--;
-      showQuestion();
-    }
-  };
-
-  showAnswersBtn.onclick = () => {
-    allAnswersBox.innerHTML = `
-      <h2>📝 오답노트</h2>
-      ${wrongAnswers.length === 0 ? '<p>모든 문제를 맞췄습니다! 🎉</p>' : ''}
-      ${wrongAnswers.map((w, idx) => `
-        <div class="wrong-answer">
-          <h3>Q${idx + 1}. ${w.question}</h3>
-          <p><b>내 답:</b> ${w.selected}번</p>
-          <p><b>정답:</b> ${w.correct}번 (${w.correctText})</p>
-          <p><b>해설:</b> ${w.explanation}</p>
-        </div>
-      `).join('')}
-      <div class="final-score">최종 점수: ${score} / ${problems.length}</div>
-    `;
-    allAnswersBox.style.display = 'block';
-    questionBox.innerHTML = '';
-    navButtons.style.display = 'none';
-    backToMainBtn.style.display = 'inline-block';
-  };
-
-  backToMainBtn.onclick = showMain;
-
-  showMain();
-});
+// 최초 시작
+showYearSelect();
