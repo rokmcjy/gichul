@@ -123,7 +123,7 @@ function renderYearSelect() {
   });
 }
 
-// ✅ DOMContentLoaded로 전체 묶음
+// ✅ DOMContentLoaded로 안전하게 묶기
 document.addEventListener('DOMContentLoaded', () => {
   renderYearSelect();
 
