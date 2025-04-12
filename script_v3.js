@@ -2,14 +2,14 @@ let problemsData = {};
 let currentQuestions = [];
 let currentIndex = 0;
 
-// ✅ JSON 파일 절대경로 fetch
+// ✅ 절대경로 fetch로 문제 불러오기
 async function loadProblems(year) {
-  const baseUrl = 'https://rokmcjy.github.io/gichul';  // 네 깃허브 Pages 기본 주소
+  const baseUrl = 'https://rokmcjy.github.io/gichul'; // 너 깃허브 주소
   const res = await fetch(`${baseUrl}/problems/${year}.json`);
   problemsData = await res.json();
 }
 
-// ✅ 과목 리스트 표시
+// ✅ 과목 리스트 만들기
 function renderSubjects() {
   const subjectDiv = document.getElementById('subject-select');
   subjectDiv.innerHTML = '';
@@ -22,7 +22,7 @@ function renderSubjects() {
   });
 }
 
-// ✅ 과목 선택 → 문제 시작
+// ✅ 문제풀이 시작
 function startQuiz(subject) {
   currentQuestions = problemsData.filter(p => p.subject === subject);
   currentIndex = 0;
@@ -35,7 +35,7 @@ function startQuiz(subject) {
   renderQuestion();
 }
 
-// ✅ 문제 1개 보여주기
+// ✅ 문제 하나 보여주기
 function renderQuestion() {
   const questionBox = document.getElementById('question-box');
   if (currentIndex < 0) currentIndex = 0;
@@ -57,7 +57,7 @@ function renderQuestion() {
   `;
 }
 
-// ✅ 정답 체크
+// ✅ 답 체크
 function checkAnswer(selected, correct, button) {
   const buttons = document.querySelectorAll('.choice-button');
 
@@ -99,7 +99,7 @@ function backToMain() {
   currentQuestions = [];
   currentIndex = 0;
 
-  renderYearSelect();
+  renderYearSelect(); // ✅ 메인으로 갈 때 년도 버튼 다시 만들어주기
 }
 
 // ✅ 다음 문제
@@ -118,7 +118,7 @@ function prevQuestion() {
   }
 }
 
-// ✅ 년도 선택 화면
+// ✅ 년도 버튼 만들기 (여기서 버튼+onclick 같이 등록)
 function renderYearSelect() {
   const yearDiv = document.getElementById('year-select');
   yearDiv.innerHTML = '';
@@ -126,15 +126,20 @@ function renderYearSelect() {
   [2023, 2024].forEach(year => {
     const btn = document.createElement('button');
     btn.innerText = `${year}년도`;
+
+    // ✅ 버튼 클릭할 때 문제 가져오고 과목 리스트 보여주기
     btn.onclick = async () => {
       await loadProblems(year);
       renderSubjects();
     };
+
     yearDiv.appendChild(btn);
   });
+
+  yearDiv.style.display = 'block'; // ✅ 혹시 숨겨져 있던거 다시 보이게
 }
 
-// ✅ 문서가 준비되면 실행
+// ✅ 시작할 때
 document.addEventListener('DOMContentLoaded', () => {
   renderYearSelect();
 
