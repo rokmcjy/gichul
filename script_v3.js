@@ -1,208 +1,157 @@
-let problemsData = {};
-let selectedYear = null;
-let selectedSubject = null;
-let currentProblems = [];
-let currentIndex = 0;
-let wrongAnswers = [];
-let correctCount = 0;
-
 const app = document.getElementById('app');
+const yearSelect = document.getElementById('year-select');
+const subjectSelect = document.getElementById('subject-select');
+const questionBox = document.getElementById('question-box');
+const backToMainBtn = document.getElementById('back-to-main');
+const showWrongAnswersBtn = document.getElementById('show-wrong-answers');
+const navButtons = document.getElementById('nav-buttons');
+const prevBtn = document.getElementById('prev-question');
+const nextBtn = document.getElementById('next-question');
+const allAnswersDiv = document.getElementById('all-answers');
 
-function resetState() {
-  selectedYear = null;
-  selectedSubject = null;
-  currentProblems = [];
-  currentIndex = 0;
-  wrongAnswers = [];
-  correctCount = 0;
-}
+const availableYears = ['2024']; // << ë¬¸ì œ ë°ì´í„° ìˆëŠ” ì—°ë„ë§Œ ë‚˜ì—´
+const subjects = [
+  { code: 'gakron', name: 'ë¶€ë™ì‚°í•™ê°œë¡ ' },
+  { code: 'mlaw', name: 'ë¯¼ë²• ë° ë¯¼ì‚¬íŠ¹ë³„ë²•' },
+  { code: 'gong', name: 'ë¶€ë™ì‚°ê³µë²•' },
+  { code: 'sa', name: 'ë¶€ë™ì‚°ì¤‘ê°œì‚¬ë²•ë ¹ ë° ì‹¤ë¬´' },
+  { code: 'si', name: 'ë¶€ë™ì‚°ê³µì‹œë²•' }
+];
 
-function createButton(text, onClick) {
-  const btn = document.createElement('button');
-  btn.textContent = text;
-  btn.onclick = onClick;
-  return btn;
-}
+let problemsData = [];
+let currentQuestionIndex = 0;
+let selectedYear = '';
+let selectedSubject = '';
+let wrongAnswers = [];
 
-function loadProblems(year, subject) {
-  const fileName = `problems/${year}_${subject}.json`;
-  fetch(fileName)
-    .then(response => {
-      if (!response.ok) throw new Error('¹®Á¦ ÆÄÀÏÀ» ºÒ·¯¿Ã ¼ö ¾ø½À´Ï´Ù.');
-      return response.json();
-    })
-    .then(data => {
-      currentProblems = data;
-      currentIndex = 0;
-      correctCount = 0;
-      wrongAnswers = [];
-      showQuestion();
-    })
-    .catch(error => {
-      alert(error.message);
-    });
-}
+function showYearSelect() {
+  yearSelect.innerHTML = '';
+  subjectSelect.innerHTML = '';
+  questionBox.innerHTML = '';
+  allAnswersDiv.innerHTML = '';
+  backToMainBtn.style.display = 'none';
+  showWrongAnswersBtn.style.display = 'none';
+  navButtons.style.display = 'none';
 
-function showYears() {
-  resetState();
-  app.innerHTML = '<h1>°øÀÎÁß°³»ç ¹®Á¦Ç®ÀÌ</h1>';
-  const yearSelect = document.createElement('div');
-  yearSelect.id = 'year-select';
-  
-  const availableYears = Object.keys(problemsData);
   availableYears.forEach(year => {
-    const btn = createButton(`${year}³âµµ`, () => showSubjects(year));
+    const btn = document.createElement('button');
+    btn.textContent = `${year}ë…„ë„`;
+    btn.onclick = () => showSubjectSelect(year);
     yearSelect.appendChild(btn);
   });
-
-  app.appendChild(yearSelect);
 }
 
-function showSubjects(year) {
+function showSubjectSelect(year) {
   selectedYear = year;
-  app.innerHTML = '<h1>°øÀÎÁß°³»ç ¹®Á¦Ç®ÀÌ</h1>';
-  const subjectSelect = document.createElement('div');
-  subjectSelect.id = 'subject-select';
+  yearSelect.innerHTML = '';
+  subjectSelect.innerHTML = '';
 
-  const subjects = problemsData[year];
-  subjects.forEach(subject => {
-    const btn = createButton(subject.name, () => {
-      selectedSubject = subject.code;
-      loadProblems(year, selectedSubject);
-    });
+  subjects.forEach(subj => {
+    const btn = document.createElement('button');
+    btn.textContent = subj.name;
+    btn.onclick = () => loadProblems(year, subj.code);
     subjectSelect.appendChild(btn);
   });
 
-  const mainBtn = createButton('¸ŞÀÎÀ¸·Î °¡±â', showYears);
-  subjectSelect.appendChild(mainBtn);
+  const backBtn = document.createElement('button');
+  backBtn.textContent = 'ë©”ì¸ìœ¼ë¡œ ê°€ê¸°';
+  backBtn.onclick = showYearSelect;
+  subjectSelect.appendChild(backBtn);
+}
 
-  app.appendChild(subjectSelect);
+async function loadProblems(year, subjectCode) {
+  selectedSubject = subjectCode;
+  try {
+    const res = await fetch(`problems/${year}_${subjectCode}.json`);
+    if (!res.ok) throw new Error('ë¬¸ì œ íŒŒì¼ì„ ë¶ˆëŸ¬ì˜¬ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.');
+    problemsData = await res.json();
+    currentQuestionIndex = 0;
+    wrongAnswers = [];
+    showQuestion();
+    backToMainBtn.style.display = 'inline-block';
+    showWrongAnswersBtn.style.display = 'inline-block';
+    navButtons.style.display = 'flex';
+  } catch (error) {
+    alert(error.message);
+  }
 }
 
 function showQuestion() {
-  if (currentIndex >= currentProblems.length) {
-    showResultSummary();
+  if (!problemsData.length) return;
+
+  const q = problemsData[currentQuestionIndex];
+  questionBox.innerHTML = `
+    <h2>Q${currentQuestionIndex + 1}. ${q.question}</h2>
+    ${q.choices.map((choice, idx) => `
+      <button class="choice" onclick="selectAnswer(${idx + 1})">${idx + 1}. ${choice}</button>
+    `).join('')}
+    <div class="explanation" style="display:none;"></div>
+  `;
+}
+
+function selectAnswer(selected) {
+  const q = problemsData[currentQuestionIndex];
+  const choiceBtns = document.querySelectorAll('.choice');
+  choiceBtns.forEach((btn, idx) => {
+    btn.disabled = true;
+    if (idx + 1 === q.answer) {
+      btn.classList.add('correct');
+    }
+    if (idx + 1 === selected && idx + 1 !== q.answer) {
+      btn.classList.add('incorrect');
+    }
+  });
+
+  if (selected !== q.answer) {
+    wrongAnswers.push({
+      question: q.question,
+      yourAnswer: selected,
+      correctAnswer: `${q.answer}. ${q.choices[q.answer - 1]}`,
+      explanation: q.explanation
+    });
+  }
+
+  document.querySelector('.explanation').style.display = 'block';
+  document.querySelector('.explanation').innerHTML = `<b>í•´ì„¤:</b> ${q.explanation}`;
+}
+
+prevBtn.onclick = () => {
+  if (currentQuestionIndex > 0) {
+    currentQuestionIndex--;
+    showQuestion();
+  }
+};
+
+nextBtn.onclick = () => {
+  if (currentQuestionIndex < problemsData.length - 1) {
+    currentQuestionIndex++;
+    showQuestion();
+  }
+};
+
+backToMainBtn.onclick = showYearSelect;
+
+showWrongAnswersBtn.onclick = () => {
+  yearSelect.innerHTML = '';
+  subjectSelect.innerHTML = '';
+  questionBox.innerHTML = '';
+  navButtons.style.display = 'none';
+
+  if (wrongAnswers.length === 0) {
+    allAnswersDiv.innerHTML = `<h2>ëª¨ë“  ë¬¸ì œë¥¼ ì •ë‹µìœ¼ë¡œ ë§í˜”ìŠµë‹ˆë‹¤! ğŸ‰</h2>`;
     return;
   }
 
-  const currentProblem = currentProblems[currentIndex];
-  app.innerHTML = `
-    <h1>°øÀÎÁß°³»ç ¹®Á¦Ç®ÀÌ</h1>
-    <div id="question-box">
-      <h2>Q${currentIndex + 1}. ${currentProblem.question}</h2>
-    </div>
-    <div id="buttons">
-      <button id="main-menu">¸ŞÀÎÀ¸·Î °¡±â</button>
-      <button id="show-wrong-note">?? ¿À´ä³ëÆ® º¸±â</button>
-    </div>
-    <div id="nav-buttons">
-      <button id="prev-question">ÀÌÀü ¹®Á¦</button>
-      <button id="next-question">´ÙÀ½ ¹®Á¦</button>
-    </div>
-  `;
-
-  const questionBox = document.getElementById('question-box');
-
-  currentProblem.choices.forEach((choice, i) => {
-    const btn = createButton(`${i + 1}. ${choice}`, () => {
-      handleAnswer(btn, i, currentProblem.answer);
-    });
-    questionBox.appendChild(btn);
-  });
-
-  document.getElementById('main-menu').onclick = showYears;
-  document.getElementById('show-wrong-note').onclick = showWrongNote;
-  document.getElementById('prev-question').onclick = prevQuestion;
-  document.getElementById('next-question').onclick = nextQuestion;
-}
-
-function handleAnswer(btn, selectedIndex, answerIndex) {
-  const buttons = document.querySelectorAll('#question-box button');
-  buttons.forEach(button => button.disabled = true);
-
-  buttons[answerIndex].classList.add('correct');
-
-  if (selectedIndex !== answerIndex) {
-    btn.classList.add('incorrect');
-    wrongAnswers.push({
-      question: currentProblems[currentIndex].question,
-      selected: selectedIndex,
-      correct: answerIndex,
-      explanation: currentProblems[currentIndex].explanation
-    });
-  } else {
-    correctCount++;
-  }
-}
-
-function prevQuestion() {
-  if (currentIndex > 0) {
-    currentIndex--;
-    showQuestion();
-  }
-}
-
-function nextQuestion() {
-  if (currentIndex < currentProblems.length - 1) {
-    currentIndex++;
-    showQuestion();
-  }
-}
-
-function showWrongNote() {
-  app.innerHTML = '<h1>?? ¿À´ä³ëÆ®</h1>';
-  
-  if (wrongAnswers.length === 0) {
-    app.innerHTML += '<p>¿À´äÀÌ ¾ø½À´Ï´Ù! ??</p>';
-  } else {
-    wrongAnswers.forEach((item, idx) => {
-      const div = document.createElement('div');
-      div.innerHTML = `
-        <h3>Q${idx + 1}. ${item.question}</h3>
-        <p><strong>¼±ÅÃÇÑ ´ä:</strong> ${item.selected + 1}¹ø</p>
-        <p><strong>Á¤´ä:</strong> ${item.correct + 1}¹ø (${currentProblems[item.correct].choices[item.correct]})</p>
-        <p><strong>ÇØ¼³:</strong> ${item.explanation}</p>
-      `;
-      app.appendChild(div);
-    });
-  }
-
-  const mainBtn = createButton('¸ŞÀÎÀ¸·Î °¡±â', showYears);
-  app.appendChild(mainBtn);
-}
-
-function showResultSummary() {
-  app.innerHTML = `
-    <h1>¹®Á¦Ç®ÀÌ ¿Ï·á</h1>
-    <h2>Á¤´ä °³¼ö: ${correctCount} / ${currentProblems.length}</h2>
-  `;
-
-  const mainBtn = createButton('¸ŞÀÎÀ¸·Î °¡±â', showYears);
-  const wrongNoteBtn = createButton('?? ¿À´ä³ëÆ® º¸±â', showWrongNote);
-
-  app.appendChild(mainBtn);
-  app.appendChild(wrongNoteBtn);
-}
-
-// ¹®Á¦ µ¥ÀÌÅÍ Á¤ÀÇ
-problemsData = {
-  "2024": [
-    { code: "gakron", name: "ºÎµ¿»êÇĞ°³·Ğ" },
-    { code: "mlaw", name: "¹Î¹ı ¹× ¹Î»çÆ¯º°¹ı" },
-    { code: "gong", name: "ºÎµ¿»ê°ø¹ı" },
-    { code: "sa", name: "°øÀÎÁß°³»ç¹ı·É ¹× ½Ç¹«" },
-    { code: "si", name: "ºÎµ¿»ê°ø½Ã¹ı" },
-    { code: "se", name: "ºÎµ¿»ê¼¼¹ı" }
-  ],
-  "2023": [
-    { code: "gakron", name: "ºÎµ¿»êÇĞ°³·Ğ" },
-    { code: "mlaw", name: "¹Î¹ı ¹× ¹Î»çÆ¯º°¹ı" },
-    { code: "gong", name: "ºÎµ¿»ê°ø¹ı" },
-    { code: "sa", name: "°øÀÎÁß°³»ç¹ı·É ¹× ½Ç¹«" },
-    { code: "si", name: "ºÎµ¿»ê°ø½Ã¹ı" },
-    { code: "se", name: "ºÎµ¿»ê¼¼¹ı" }
-  ]
-  // 2022, 2021, 2020µµ ºñ½ÁÇÏ°Ô Ãß°¡ °¡´É
+  allAnswersDiv.innerHTML = `<h2>ğŸ§¾ ì˜¤ë‹µë…¸íŠ¸</h2>` +
+    wrongAnswers.map((w, idx) => `
+      <div>
+        <h3>Q${idx + 1}. ${w.question}</h3>
+        <p><b>ë‹¹ì‹ ì˜ ë‹µ:</b> ${w.yourAnswer}ë²ˆ</p>
+        <p><b>ì •ë‹µ:</b> ${w.correctAnswer}</p>
+        <p><b>í•´ì„¤:</b> ${w.explanation}</p>
+      </div>
+      <hr/>
+    `).join('');
 };
 
-showYears();
+showYearSelect();
