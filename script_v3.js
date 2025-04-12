@@ -16,7 +16,6 @@ let currentQuestionIndex = 0;
 let wrongAnswers = [];
 let score = 0;
 
-// 과목 리스트
 const subjects = {
   "mlaw": "민법 및 민사특별법",
   "gongron": "부동산학개론",
@@ -94,16 +93,21 @@ function showQuestion() {
   questionBox.innerHTML = `
     <div class="question">
       <h2>Q${currentQuestionIndex + 1}. ${problem.question}</h2>
-      <div class="choices">
-        ${problem.choices.map((choice, idx) => `
-          <button onclick="selectAnswer(${idx + 1})">${idx + 1}. ${choice}</button>
-        `).join('')}
-      </div>
+      <div class="choices" id="choices-container"></div>
     </div>
   `;
 
+  const choicesContainer = document.getElementById('choices-container');
+  problem.choices.forEach((choice, idx) => {
+    const btn = document.createElement('button');
+    btn.textContent = `${idx + 1}. ${choice}`;
+    btn.onclick = () => selectAnswer(idx + 1);
+    choicesContainer.appendChild(btn);
+  });
+
   backToMainBtn.style.display = 'inline-block';
   showAnswersBtn.style.display = 'inline-block';
+  showAnswersBtn.textContent = "📝 오답노트 보기";
   navButtons.style.display = 'flex';
   allAnswersBox.style.display = 'none';
 }
@@ -111,7 +115,6 @@ function showQuestion() {
 // 답변 선택
 function selectAnswer(selected) {
   const problem = problems[currentQuestionIndex];
-
   const buttons = document.querySelectorAll('.choices button');
   buttons.forEach(btn => btn.disabled = true);
 
@@ -131,9 +134,6 @@ function selectAnswer(selected) {
   buttons[problem.answer - 1].classList.add('correct');
 }
 
-// 전역 등록
-window.selectAnswer = selectAnswer;
-
 // 다음 문제
 nextQuestionBtn.onclick = () => {
   currentQuestionIndex++;
@@ -148,7 +148,7 @@ prevQuestionBtn.onclick = () => {
   }
 };
 
-// 전체 정답 보기 (오답노트)
+// 오답노트 보기
 showAnswersBtn.onclick = () => {
   allAnswersBox.innerHTML = `
     <h2>📝 오답노트</h2>
