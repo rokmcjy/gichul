@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', function() {
     showAnswersBtn.style.display = 'none';
     navButtons.style.display = 'none';
 
-    const years = [2024]; // 데이터 있는 연도만
+    const years = [2024];
     years.forEach(year => {
       const btn = document.createElement('button');
       btn.textContent = `${year}년도`;
@@ -98,7 +98,8 @@ document.addEventListener('DOMContentLoaded', function() {
     problem.choices.forEach((choice, idx) => {
       const btn = document.createElement('button');
       btn.textContent = `${idx + 1}. ${choice}`;
-      btn.onclick = () => selectAnswer(idx + 1);
+      btn.className = 'choice-btn';
+      btn.addEventListener('click', () => selectAnswer(idx + 1)); // ✅ 여기 다시 정확히 연결
       choicesContainer.appendChild(btn);
     });
 
@@ -126,8 +127,12 @@ document.addEventListener('DOMContentLoaded', function() {
       });
     }
 
-    buttons[selected - 1].classList.add(selected === problem.answer ? 'correct' : 'wrong');
-    buttons[problem.answer - 1].classList.add('correct');
+    if (buttons[selected - 1]) {
+      buttons[selected - 1].classList.add(selected === problem.answer ? 'correct' : 'wrong');
+    }
+    if (buttons[problem.answer - 1]) {
+      buttons[problem.answer - 1].classList.add('correct');
+    }
   }
 
   nextQuestionBtn.onclick = () => {
