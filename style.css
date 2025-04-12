@@ -18,9 +18,9 @@ body {
 
 button {
   display: block;
-  width: 100%;
-  margin: 10px 0;
-  padding: 15px;
+  width: 90%;
+  margin: 5px auto;
+  padding: 12px;
   background: #4285F4;
   color: white;
   border: none;
@@ -37,8 +37,18 @@ button:hover {
   background-color: #4CAF50 !important;
 }
 
-.incorrect {
+.wrong {
   background-color: #f44336 !important;
+}
+
+.button-row {
+  display: flex;
+  justify-content: space-between;
+  margin: 10px 0;
+}
+
+.button-row button {
+  width: 48%;
 }
 
 #explanation {
