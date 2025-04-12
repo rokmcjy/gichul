@@ -116,25 +116,30 @@ function showResult() {
   document.getElementById('nav-buttons').style.display = 'none';
 }
 
-// ✅ 오답노트 보여주기
+// ✅ 오답노트 보여주기 (정답 내용도 표시)
 function showWrongQuestions() {
   const questionBox = document.getElementById('question-box');
 
   if (wrongQuestions.length === 0) {
-    questionBox.innerHTML = `<h3>오답이 없습니다! 완벽합니다 🎉</h3><br><button onclick="backToMain()">메인으로 가기</button>`;
+    questionBox.innerHTML = `
+      <h3>✅ 오답이 없습니다! 완벽합니다 🎉</h3>
+      <br>
+      <button onclick="backToMain()">메인으로 가기</button>
+    `;
     return;
   }
 
   questionBox.innerHTML = `
     <h2>📚 오답노트</h2>
     ${wrongQuestions.map((q, idx) => `
-      <div style="margin-bottom: 20px;">
+      <div style="margin-bottom: 20px; padding:10px; background:#f9f9f9; border-radius:8px;">
         <b>Q${idx + 1}. ${q.question}</b><br>
-        <i>정답: ${q.answer}번</i><br>
-        <div style="margin-top: 5px; font-size: 14px; color: #555;">해설: ${q.explanation}</div>
+        <i style="color:#333;">정답: ${q.answer}번 - ${q.choices[q.answer - 1]}</i><br>
+        <div style="margin-top: 8px; font-size: 14px; color: #555;">해설: ${q.explanation}</div>
       </div>
     `).join('')}
-    <br><button onclick="backToMain()">메인으로 가기</button>
+    <br>
+    <button onclick="backToMain()">메인으로 가기</button>
   `;
 }
 
