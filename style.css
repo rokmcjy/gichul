@@ -1,0 +1,83 @@
+body {
+  font-family: 'Noto Sans KR', Arial, sans-serif;
+  margin: 0;
+  padding: 20px;
+  background-color: #f2f2f2;
+}
+
+#app {
+  max-width: 700px;
+  margin: auto;
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 28px;
+}
+
+button {
+  display: block;
+  width: 100%;
+  padding: 16px;
+  margin: 10px 0;
+  font-size: 18px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  background-color: #4285f4;
+  color: white;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background-color: #3367d6;
+}
+
+.choice-button {
+  background-color: #eee;
+  color: black;
+  text-align: left;
+}
+
+.choice-button.correct {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.choice-button.wrong {
+  background-color: #F44336;
+  color: white;
+}
+
+#buttons, #nav-buttons {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+#buttons button, #nav-buttons button {
+  flex: 1;
+}
+
+#all-answers {
+  margin-top: 20px;
+  background: #f9f9f9;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 16px;
+}
+
+#explanation-box {
+  margin-top: 15px;
+  font-size: 16px;
+  color: #555;
+  white-space: pre-wrap; /* 줄바꿈 허용 */
+  word-break: keep-all; /* 단어 중간에 줄 안 끊기 */
+  overflow-wrap: break-word; /* 너무 길면 강제로 줄바꿈 */
+}
