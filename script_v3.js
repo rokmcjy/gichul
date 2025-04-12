@@ -1,174 +1,208 @@
-document.addEventListener('DOMContentLoaded', function() {
-  const app = document.getElementById('app');
-  const yearSelect = document.getElementById('year-select');
-  const subjectSelect = document.getElementById('subject-select');
-  const questionBox = document.getElementById('question-box');
-  const backToMainBtn = document.getElementById('back-to-main');
-  const showAnswersBtn = document.getElementById('show-answers');
-  const navButtons = document.getElementById('nav-buttons');
-  const prevQuestionBtn = document.getElementById('prev-question');
-  const nextQuestionBtn = document.getElementById('next-question');
-  const allAnswersBox = document.getElementById('all-answers');
+let problemsData = {};
+let selectedYear = null;
+let selectedSubject = null;
+let currentProblems = [];
+let currentIndex = 0;
+let wrongAnswers = [];
+let correctCount = 0;
 
-  let currentYear = '';
-  let currentSubject = '';
-  let problems = [];
-  let currentQuestionIndex = 0;
-  let wrongAnswers = [];
-  let score = 0;
+const app = document.getElementById('app');
 
-  const subjects = [
-    { code: 'gakron', name: 'ë¶€ë™ì‚°í•™ê°œë¡ ' },
-    { code: 'mlaw', name: 'ë¯¼ë²• ë° ë¯¼ì‚¬íŠ¹ë³„ë²•' },
-    { code: 'gonglog', name: 'ë¶€ë™ì‚°ê³µë²•' },
-    { code: 'junggae', name: 'ë¶€ë™ì‚°ì¤‘ê°œì‚¬ë²•ë ¹ ë° ì‹¤ë¬´' },
-    { code: 'gongsi', name: 'ë¶€ë™ì‚°ê³µì‹œë²•' },
-    { code: 'tax', name: 'ë¶€ë™ì‚°ì„¸ë²•' }
-  ];
+function resetState() {
+  selectedYear = null;
+  selectedSubject = null;
+  currentProblems = [];
+  currentIndex = 0;
+  wrongAnswers = [];
+  correctCount = 0;
+}
 
-  function showMain() {
-    yearSelect.innerHTML = '';
-    subjectSelect.innerHTML = '';
-    questionBox.innerHTML = '';
-    allAnswersBox.innerHTML = '';
-    backToMainBtn.style.display = 'none';
-    showAnswersBtn.style.display = 'none';
-    navButtons.style.display = 'none';
+function createButton(text, onClick) {
+  const btn = document.createElement('button');
+  btn.textContent = text;
+  btn.onclick = onClick;
+  return btn;
+}
 
-    const years = [2024, 2023, 2022, 2021, 2020];
-    years.forEach(year => {
-      const btn = document.createElement('button');
-      btn.textContent = `${year}ë…„ë„`;
-      btn.className = 'year-btn';
-      btn.onclick = () => showSubjects(year);
-      yearSelect.appendChild(btn);
-    });
-  }
-
-  function showSubjects(year) {
-    currentYear = year;
-    yearSelect.innerHTML = '';
-    subjectSelect.innerHTML = '';
-    questionBox.innerHTML = '';
-    allAnswersBox.innerHTML = '';
-
-    subjects.forEach(subject => {
-      const btn = document.createElement('button');
-      btn.textContent = subject.name;
-      btn.className = 'subject-btn';
-      btn.onclick = () => loadProblems(year, subject.code);
-      subjectSelect.appendChild(btn);
-    });
-
-    backToMainBtn.style.display = 'inline-block';
-    showAnswersBtn.style.display = 'none';
-    navButtons.style.display = 'none';
-  }
-
-  async function loadProblems(year, subjectCode) {
-    try {
-      const response = await fetch(`/gichul/problems/${year}_${subjectCode}.json`);
-      if (!response.ok) throw new Error('ë¬¸ì œ íŒŒì¼ì„ ë¶ˆëŸ¬ì˜¬ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.');
-      problems = await response.json();
-      currentSubject = subjectCode;
-      currentQuestionIndex = 0;
+function loadProblems(year, subject) {
+  const fileName = `problems/${year}_${subject}.json`;
+  fetch(fileName)
+    .then(response => {
+      if (!response.ok) throw new Error('¹®Á¦ ÆÄÀÏÀ» ºÒ·¯¿Ã ¼ö ¾ø½À´Ï´Ù.');
+      return response.json();
+    })
+    .then(data => {
+      currentProblems = data;
+      currentIndex = 0;
+      correctCount = 0;
       wrongAnswers = [];
-      score = 0;
-      subjectSelect.innerHTML = '';
       showQuestion();
-    } catch (error) {
+    })
+    .catch(error => {
       alert(error.message);
-    }
-  }
-
-  function showQuestion() {
-    if (currentQuestionIndex >= problems.length) {
-      showResult();
-      return;
-    }
-
-    const problem = problems[currentQuestionIndex];
-    questionBox.innerHTML = `
-      <div class="question">
-        <h2>Q${currentQuestionIndex + 1}. ${problem.question}</h2>
-        <div class="choices" id="choices-container"></div>
-      </div>
-    `;
-
-    const choicesContainer = document.getElementById('choices-container');
-    problem.choices.forEach((choice, idx) => {
-      const btn = document.createElement('button');
-      btn.textContent = `${idx + 1}. ${choice}`;
-      btn.onclick = () => selectAnswer(idx + 1);
-      choicesContainer.appendChild(btn);
     });
+}
 
-    backToMainBtn.style.display = 'inline-block';
-    showAnswersBtn.style.display = 'inline-block';
-    showAnswersBtn.textContent = "ğŸ“ ì˜¤ë‹µë…¸íŠ¸ ë³´ê¸°";
-    navButtons.style.display = 'flex';
-    allAnswersBox.style.display = 'none';
+function showYears() {
+  resetState();
+  app.innerHTML = '<h1>°øÀÎÁß°³»ç ¹®Á¦Ç®ÀÌ</h1>';
+  const yearSelect = document.createElement('div');
+  yearSelect.id = 'year-select';
+  
+  const availableYears = Object.keys(problemsData);
+  availableYears.forEach(year => {
+    const btn = createButton(`${year}³âµµ`, () => showSubjects(year));
+    yearSelect.appendChild(btn);
+  });
+
+  app.appendChild(yearSelect);
+}
+
+function showSubjects(year) {
+  selectedYear = year;
+  app.innerHTML = '<h1>°øÀÎÁß°³»ç ¹®Á¦Ç®ÀÌ</h1>';
+  const subjectSelect = document.createElement('div');
+  subjectSelect.id = 'subject-select';
+
+  const subjects = problemsData[year];
+  subjects.forEach(subject => {
+    const btn = createButton(subject.name, () => {
+      selectedSubject = subject.code;
+      loadProblems(year, selectedSubject);
+    });
+    subjectSelect.appendChild(btn);
+  });
+
+  const mainBtn = createButton('¸ŞÀÎÀ¸·Î °¡±â', showYears);
+  subjectSelect.appendChild(mainBtn);
+
+  app.appendChild(subjectSelect);
+}
+
+function showQuestion() {
+  if (currentIndex >= currentProblems.length) {
+    showResultSummary();
+    return;
   }
 
-  function selectAnswer(selected) {
-    const problem = problems[currentQuestionIndex];
-    const buttons = document.querySelectorAll('.choices button');
-    buttons.forEach(btn => btn.disabled = true);
+  const currentProblem = currentProblems[currentIndex];
+  app.innerHTML = `
+    <h1>°øÀÎÁß°³»ç ¹®Á¦Ç®ÀÌ</h1>
+    <div id="question-box">
+      <h2>Q${currentIndex + 1}. ${currentProblem.question}</h2>
+    </div>
+    <div id="buttons">
+      <button id="main-menu">¸ŞÀÎÀ¸·Î °¡±â</button>
+      <button id="show-wrong-note">?? ¿À´ä³ëÆ® º¸±â</button>
+    </div>
+    <div id="nav-buttons">
+      <button id="prev-question">ÀÌÀü ¹®Á¦</button>
+      <button id="next-question">´ÙÀ½ ¹®Á¦</button>
+    </div>
+  `;
 
-    if (selected === problem.answer) {
-      score++;
-    } else {
-      wrongAnswers.push({
-        question: problem.question,
-        selected: selected,
-        correct: problem.answer,
-        explanation: problem.explanation,
-        correctText: problem.choices[problem.answer - 1]
-      });
-    }
+  const questionBox = document.getElementById('question-box');
 
-    if (buttons[selected - 1]) {
-      buttons[selected - 1].classList.add(selected === problem.answer ? 'correct' : 'wrong');
-    }
-    if (buttons[problem.answer - 1]) {
-      buttons[problem.answer - 1].classList.add('correct');
-    }
+  currentProblem.choices.forEach((choice, i) => {
+    const btn = createButton(`${i + 1}. ${choice}`, () => {
+      handleAnswer(btn, i, currentProblem.answer);
+    });
+    questionBox.appendChild(btn);
+  });
+
+  document.getElementById('main-menu').onclick = showYears;
+  document.getElementById('show-wrong-note').onclick = showWrongNote;
+  document.getElementById('prev-question').onclick = prevQuestion;
+  document.getElementById('next-question').onclick = nextQuestion;
+}
+
+function handleAnswer(btn, selectedIndex, answerIndex) {
+  const buttons = document.querySelectorAll('#question-box button');
+  buttons.forEach(button => button.disabled = true);
+
+  buttons[answerIndex].classList.add('correct');
+
+  if (selectedIndex !== answerIndex) {
+    btn.classList.add('incorrect');
+    wrongAnswers.push({
+      question: currentProblems[currentIndex].question,
+      selected: selectedIndex,
+      correct: answerIndex,
+      explanation: currentProblems[currentIndex].explanation
+    });
+  } else {
+    correctCount++;
   }
+}
 
-  function showResult() {
-    allAnswersBox.innerHTML = `
-      <h2>ğŸ“ ì˜¤ë‹µë…¸íŠ¸</h2>
-      ${wrongAnswers.length === 0 ? '<p>ëª¨ë“  ë¬¸ì œë¥¼ ë§ì·„ìŠµë‹ˆë‹¤! ğŸ‰</p>' : ''}
-      ${wrongAnswers.map((w, idx) => `
-        <div class="wrong-answer">
-          <h3>Q${idx + 1}. ${w.question}</h3>
-          <p><b>ë‚´ ë‹µ:</b> ${w.selected}ë²ˆ</p>
-          <p><b>ì •ë‹µ:</b> ${w.correct}ë²ˆ (${w.correctText})</p>
-          <p><b>í•´ì„¤:</b> ${w.explanation}</p>
-        </div>
-      `).join('')}
-      <div class="final-score">ìµœì¢… ì ìˆ˜: ${score} / ${problems.length}</div>
-    `;
-    allAnswersBox.style.display = 'block';
-    questionBox.innerHTML = '';
-    navButtons.style.display = 'none';
-    backToMainBtn.style.display = 'inline-block';
-  }
-
-  nextQuestionBtn.onclick = () => {
-    currentQuestionIndex++;
+function prevQuestion() {
+  if (currentIndex > 0) {
+    currentIndex--;
     showQuestion();
-  };
+  }
+}
 
-  prevQuestionBtn.onclick = () => {
-    if (currentQuestionIndex > 0) {
-      currentQuestionIndex--;
-      showQuestion();
-    }
-  };
+function nextQuestion() {
+  if (currentIndex < currentProblems.length - 1) {
+    currentIndex++;
+    showQuestion();
+  }
+}
 
-  backToMainBtn.onclick = showMain;
-  showAnswersBtn.onclick = showResult;
+function showWrongNote() {
+  app.innerHTML = '<h1>?? ¿À´ä³ëÆ®</h1>';
+  
+  if (wrongAnswers.length === 0) {
+    app.innerHTML += '<p>¿À´äÀÌ ¾ø½À´Ï´Ù! ??</p>';
+  } else {
+    wrongAnswers.forEach((item, idx) => {
+      const div = document.createElement('div');
+      div.innerHTML = `
+        <h3>Q${idx + 1}. ${item.question}</h3>
+        <p><strong>¼±ÅÃÇÑ ´ä:</strong> ${item.selected + 1}¹ø</p>
+        <p><strong>Á¤´ä:</strong> ${item.correct + 1}¹ø (${currentProblems[item.correct].choices[item.correct]})</p>
+        <p><strong>ÇØ¼³:</strong> ${item.explanation}</p>
+      `;
+      app.appendChild(div);
+    });
+  }
 
-  showMain();
-});
+  const mainBtn = createButton('¸ŞÀÎÀ¸·Î °¡±â', showYears);
+  app.appendChild(mainBtn);
+}
+
+function showResultSummary() {
+  app.innerHTML = `
+    <h1>¹®Á¦Ç®ÀÌ ¿Ï·á</h1>
+    <h2>Á¤´ä °³¼ö: ${correctCount} / ${currentProblems.length}</h2>
+  `;
+
+  const mainBtn = createButton('¸ŞÀÎÀ¸·Î °¡±â', showYears);
+  const wrongNoteBtn = createButton('?? ¿À´ä³ëÆ® º¸±â', showWrongNote);
+
+  app.appendChild(mainBtn);
+  app.appendChild(wrongNoteBtn);
+}
+
+// ¹®Á¦ µ¥ÀÌÅÍ Á¤ÀÇ
+problemsData = {
+  "2024": [
+    { code: "gakron", name: "ºÎµ¿»êÇĞ°³·Ğ" },
+    { code: "mlaw", name: "¹Î¹ı ¹× ¹Î»çÆ¯º°¹ı" },
+    { code: "gong", name: "ºÎµ¿»ê°ø¹ı" },
+    { code: "sa", name: "°øÀÎÁß°³»ç¹ı·É ¹× ½Ç¹«" },
+    { code: "si", name: "ºÎµ¿»ê°ø½Ã¹ı" },
+    { code: "se", name: "ºÎµ¿»ê¼¼¹ı" }
+  ],
+  "2023": [
+    { code: "gakron", name: "ºÎµ¿»êÇĞ°³·Ğ" },
+    { code: "mlaw", name: "¹Î¹ı ¹× ¹Î»çÆ¯º°¹ı" },
+    { code: "gong", name: "ºÎµ¿»ê°ø¹ı" },
+    { code: "sa", name: "°øÀÎÁß°³»ç¹ı·É ¹× ½Ç¹«" },
+    { code: "si", name: "ºÎµ¿»ê°ø½Ã¹ı" },
+    { code: "se", name: "ºÎµ¿»ê¼¼¹ı" }
+  ]
+  // 2022, 2021, 2020µµ ºñ½ÁÇÏ°Ô Ãß°¡ °¡´É
+};
+
+showYears();

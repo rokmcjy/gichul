@@ -1,30 +1,26 @@
 body {
-  font-family: 'Noto Sans KR', sans-serif;
+  font-family: Arial, sans-serif;
+  background: #f4f4f4;
+  text-align: center;
   margin: 0;
-  padding: 20px;
-  background-color: #f5f5f5;
+  padding: 0;
 }
 
 #app {
   max-width: 800px;
-  margin: auto;
-  background: white;
-  padding: 30px;
-  border-radius: 10px;
+  margin: 0 auto;
+  padding: 20px;
+  background: #fff;
+  min-height: 100vh;
   box-shadow: 0 0 10px rgba(0,0,0,0.1);
-}
-
-h1 {
-  text-align: center;
-  margin-bottom: 20px;
 }
 
 button {
   display: block;
-  width: 100%;
-  margin: 10px 0;
+  width: 90%;
+  margin: 10px auto;
   padding: 15px;
-  font-size: 18px;
+  font-size: 16px;
   border: none;
   border-radius: 8px;
   background-color: #4285F4;
@@ -33,30 +29,15 @@ button {
 }
 
 button:hover {
-  background-color: #357ae8;
+  background-color: #3367D6;
 }
 
-.choice-button {
-  background-color: #e0e0e0;
-  color: #333;
+.correct {
+  background-color: #4CAF50 !important;
+  color: white !important;
 }
 
-.choice-button.correct {
-  background-color: #4CAF50;
-  color: white;
-}
-
-.choice-button.wrong {
-  background-color: #f44336;
-  color: white;
-}
-
-#buttons, #nav-buttons {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 20px;
-}
-
-#buttons button, #nav-buttons button {
-  width: 48%;
+.incorrect {
+  background-color: #f44336 !important;
+  color: white !important;
 }
