@@ -16,20 +16,10 @@ body {
   box-shadow: 0 0 10px rgba(0,0,0,0.1);
 }
 
-h1 {
-  color: #333;
-}
-
-h2 {
-  color: #444;
-  margin-top: 20px;
-  margin-bottom: 15px;
-}
-
 button {
   display: block;
   width: 90%;
-  margin: 10px auto;
+  margin: 5px auto;
   padding: 12px;
   background: #4285F4;
   color: white;
@@ -37,16 +27,10 @@ button {
   border-radius: 8px;
   font-size: 16px;
   cursor: pointer;
-  transition: background 0.3s;
 }
 
 button:hover {
   background: #357ae8;
-}
-
-button:disabled {
-  cursor: not-allowed;
-  opacity: 0.8;
 }
 
 .correct {
@@ -68,34 +52,8 @@ button:disabled {
 }
 
 #explanation {
-  margin-top: 15px;
+  margin-top: 10px;
   background: #e0e0e0;
-  padding: 15px;
+  padding: 10px;
   border-radius: 5px;
-  text-align: left;
-  line-height: 1.5;
-}
-
-#all-answers {
-  text-align: left;
-}
-
-#all-answers div {
-  margin-bottom: 20px;
-}
-
-#all-answers h3 {
-  margin-bottom: 10px;
-}
-
-#all-answers p {
-  line-height: 1.5;
-  margin: 5px 0;
-}
-
-hr {
-  border: 0;
-  height: 1px;
-  background: #ddd;
-  margin: 20px 0;
 }
