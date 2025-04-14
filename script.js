@@ -50,6 +50,9 @@ function showSubjectSelect() {
     <button onclick="selectSubject('publiclaw')">부동산공법(국토계획법, 건축법 등)</button>
     <button onclick="selectSubject('brokerlaw')">부동산중개사법령 및 중개실무</button>
     <button onclick="selectSubject('regntax')">부동산공시법령 및 부동산세법</button>
+    <div class="button-row">
+      <button onclick="showYearSelect()">메인으로 가기</button>
+    </div>
   `;
   questionBox.innerHTML = '';
   navButtons.style.display = 'none';
@@ -127,7 +130,12 @@ function showWrongAnswers() {
   navButtons.style.display = 'none';
   allAnswersDiv.innerHTML = '';
   if (wrongAnswers.length === 0) {
-    allAnswersDiv.innerHTML = `<h2>🎉 모든 문제를 정답으로 맞혔습니다!</h2>`;
+    allAnswersDiv.innerHTML = `
+      <h2>🎉 모든 문제를 정답으로 맞혔습니다!</h2>
+      <div class="button-row">
+        <button onclick="showYearSelect()">메인으로 가기</button>
+      </div>
+    `;
     return;
   }
   allAnswersDiv.innerHTML = `
@@ -141,6 +149,9 @@ function showWrongAnswers() {
       </div>
       <hr/>
     `).join('')}
+    <div class="button-row">
+      <button onclick="showYearSelect()">메인으로 가기</button>
+    </div>
   `;
 }
 

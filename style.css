@@ -51,6 +51,11 @@ button:hover {
   width: 48%;
 }
 
+/* 한 개의 버튼만 있을 때는 너비 조정 */
+.button-row:has(button:only-child) button {
+  width: 100%;
+}
+
 #explanation {
   margin-top: 10px;
   background: #e0e0e0;
