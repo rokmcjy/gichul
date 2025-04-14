@@ -202,6 +202,8 @@ function showWrongAnswers() {
     <div class="button-row">
       <button onclick="saveWrongAnswers()">오답노트 저장하기</button>
       <button onclick="exportWrongAnswersAsText()">텍스트 파일로 저장</button>
+    </div>
+    <div class="button-row">
       <button onclick="showYearSelect()">메인으로 가기</button>
     </div>
   `;
@@ -260,6 +262,8 @@ function showSavedWrongAnswers() {
     </div>
     <div class="button-row">
       <button onclick="exportAllSavedNotesAsText()">모든 오답노트 텍스트 저장</button>
+    </div>
+    <div class="button-row">
       <button onclick="showYearSelect()">메인으로 가기</button>
     </div>
   `;
@@ -294,6 +298,8 @@ function viewSavedNote(index) {
     <div class="button-row">
       <button onclick="exportSavedNoteAsText(${index})">텍스트 파일로 저장</button>
       <button onclick="showSavedWrongAnswers()">목록으로 돌아가기</button>
+    </div>
+    <div class="button-row">
       <button onclick="showYearSelect()">메인으로 가기</button>
     </div>
   `;
