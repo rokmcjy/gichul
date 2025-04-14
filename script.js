@@ -10,6 +10,7 @@ const nextBtn = document.getElementById('next-question');
 let currentQuestions = [];
 let currentIndex = 0;
 let wrongAnswers = [];
+let correctAnswers = 0; // 맞은 문제 개수
 let selectedYear = '';
 let selectedSubject = '';
 
@@ -66,6 +67,7 @@ async function selectSubject(subject) {
   currentQuestions = data;
   currentIndex = 0;
   wrongAnswers = [];
+  correctAnswers = 0; // 맞은 문제 개수 초기화
   showQuestion();
 }
 
@@ -91,7 +93,9 @@ function checkAnswer(choiceIdx) {
     if (i === q.answer) btn.classList.add('correct');
     if (i === choiceIdx && choiceIdx !== q.answer) btn.classList.add('wrong');
   });
-  if (choiceIdx !== q.answer) {
+  if (choiceIdx === q.answer) {
+    correctAnswers++; // 정답인 경우 맞은 문제 개수 증가
+  } else {
     wrongAnswers.push({
       question: q.question,
       yourAnswerNumber: choiceIdx + 1,
@@ -129,17 +133,22 @@ function showWrongAnswers() {
   questionBox.innerHTML = '';
   navButtons.style.display = 'none';
   allAnswersDiv.innerHTML = '';
+  
   if (wrongAnswers.length === 0) {
     allAnswersDiv.innerHTML = `
-      <h2>🎉 모든 문제를 정답으로 맞혔습니다!</h2>
+      <h2>🎉 문제 결과</h2>
+      <p class="stats-summary"><b>총 ${currentQuestions.length}문제 중 ${correctAnswers}문제 정답, ${currentQuestions.length - correctAnswers}문제 오답</b></p>
+      <h3>모든 문제를 정답으로 맞혔습니다!</h3>
       <div class="button-row">
         <button onclick="showYearSelect()">메인으로 가기</button>
       </div>
     `;
     return;
   }
+  
   allAnswersDiv.innerHTML = `
     <h2>📚 오답노트</h2>
+    <p class="stats-summary"><b>총 ${currentQuestions.length}문제 중 ${correctAnswers}문제 정답, ${wrongAnswers.length}문제 오답</b></p>
     ${wrongAnswers.map((w, idx) => `
       <div>
         <h3>Q${idx + 1}. ${w.question}</h3>

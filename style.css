@@ -51,7 +51,6 @@ button:hover {
   width: 48%;
 }
 
-/* 한 개의 버튼만 있을 때는 너비 조정 */
 .button-row:has(button:only-child) button {
   width: 100%;
 }
@@ -61,4 +60,14 @@ button:hover {
   background: #e0e0e0;
   padding: 10px;
   border-radius: 5px;
+}
+
+.stats-summary {
+  background-color: #f9f9f9;
+  padding: 10px;
+  border-radius: 5px;
+  border-left: 4px solid #4285F4;
+  margin: 15px 0;
+  font-size: 18px;
+  text-align: left;
 }
