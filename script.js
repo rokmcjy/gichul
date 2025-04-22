@@ -65,13 +65,33 @@ function showSubjectSelect() {
 
 async function selectSubject(subject) {
   selectedSubject = subject;
-  const res = await fetch(`problems/${selectedYear}_${subject}.json`);
-  const data = await res.json();
-  currentQuestions = data;
-  currentIndex = 0;
-  wrongAnswers = [];
-  correctAnswers = 0; // 맞은 문제 개수 초기화
-  showQuestion();
+  try {
+    console.log(`파일 로드 시도: problems/${selectedYear}_${subject}.json`);
+    
+    const res = await fetch(`problems/${selectedYear}_${subject}.json`);
+    
+    if (!res.ok) {
+      throw new Error(`HTTP 오류! 상태: ${res.status}`);
+    }
+    
+    const data = await res.json();
+    currentQuestions = data;
+    currentIndex = 0;
+    wrongAnswers = [];
+    correctAnswers = 0; // 맞은 문제 개수 초기화
+    showQuestion();
+  } catch (error) {
+    console.error('문제를 불러오는데 실패했습니다:', error);
+    questionBox.innerHTML = `
+      <h2>문제를 불러오는데 실패했습니다</h2>
+      <p>요청한 ${selectedYear}년도 ${getSubjectName(subject)} 문제를 찾을 수 없습니다.</p>
+      <p>에러 메시지: ${error.message}</p>
+      <div class="button-row">
+        <button onclick="showSubjectSelect()">돌아가기</button>
+      </div>
+    `;
+    navButtons.style.display = 'none';
+  }
 }
 
 function showQuestion() {
@@ -449,5 +469,9 @@ function downloadTextFile(content, filename) {
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
+
+// 브라우저의 콘솔에 경로 정보 로깅
+console.log('현재 페이지 URL:', window.location.href);
+console.log('현재 페이지 경로:', window.location.pathname);
 
 showYearSelect();
