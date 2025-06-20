@@ -120,6 +120,7 @@ function checkAnswer(choiceIdx) {
     correctAnswers++; // 정답인 경우 맞은 문제 개수 증가
   } else {
     wrongAnswers.push({
+      questionNumber: q.number || (currentIndex + 1), // 실제 문제 번호 저장
       subject: selectedSubject,
       year: selectedYear,
       question: q.question,
@@ -210,9 +211,9 @@ function showWrongAnswers() {
   allAnswersDiv.innerHTML = `
     <h2>📚 오답노트</h2>
     <p class="stats-summary"><b>총 ${currentQuestions.length}문제 중 ${correctAnswers}문제 정답, ${wrongAnswers.length}문제 오답</b></p>
-    ${wrongAnswers.map((w, idx) => `
+    ${wrongAnswers.map((w) => `
       <div>
-        <h3>Q${idx + 1}. ${w.question}</h3>
+        <h3>${w.questionNumber}번. ${w.question}</h3>
         <p><b>당신의 답:</b> (${w.yourAnswerNumber}번) ${w.yourAnswer}</p>
         <p><b>정답:</b> (${w.correctAnswerNumber}번) ${w.correctAnswer}</p>
         <p><b>해설:</b> ${w.explanation}</p>
@@ -306,9 +307,9 @@ function viewSavedNote(index) {
     <h2>📚 저장된 오답노트</h2>
     <p class="note-info">${note.date} ${saveTime} - ${note.year}년 ${getSubjectName(note.subject)}</p>
     <p class="stats-summary"><b>총 ${note.totalQuestions}문제 중 ${note.correctAnswers}문제 정답, ${wrongAnswersList.length}문제 오답</b></p>
-    ${wrongAnswersList.map((w, idx) => `
+    ${wrongAnswersList.map((w) => `
       <div>
-        <h3>Q${idx + 1}. ${w.question}</h3>
+        <h3>${w.questionNumber || 'Q'}번. ${w.question}</h3>
         <p><b>당신의 답:</b> (${w.yourAnswerNumber}번) ${w.yourAnswer}</p>
         <p><b>정답:</b> (${w.correctAnswerNumber}번) ${w.correctAnswer}</p>
         <p><b>해설:</b> ${w.explanation}</p>
@@ -369,8 +370,8 @@ function exportWrongAnswersAsText() {
   textContent += `결과: 총 ${currentQuestions.length}문제 중 ${correctAnswers}문제 정답, ${wrongAnswers.length}문제 오답\n\n`;
   textContent += `-----------------------------------\n\n`;
   
-  wrongAnswers.forEach((w, idx) => {
-    textContent += `Q${idx + 1}. ${w.question}\n`;
+  wrongAnswers.forEach((w) => {
+    textContent += `${w.questionNumber}번. ${w.question}\n`;
     textContent += `당신의 답: (${w.yourAnswerNumber}번) ${w.yourAnswer}\n`;
     textContent += `정답: (${w.correctAnswerNumber}번) ${w.correctAnswer}\n`;
     textContent += `해설: ${w.explanation}\n\n`;
@@ -401,8 +402,8 @@ function exportSavedNoteAsText(index) {
   textContent += `결과: 총 ${note.totalQuestions}문제 중 ${note.correctAnswers}문제 정답, ${wrongAnswersList.length}문제 오답\n\n`;
   textContent += `-----------------------------------\n\n`;
   
-  wrongAnswersList.forEach((w, idx) => {
-    textContent += `Q${idx + 1}. ${w.question}\n`;
+  wrongAnswersList.forEach((w) => {
+    textContent += `${w.questionNumber || 'Q'}번. ${w.question}\n`;
     textContent += `당신의 답: (${w.yourAnswerNumber}번) ${w.yourAnswer}\n`;
     textContent += `정답: (${w.correctAnswerNumber}번) ${w.correctAnswer}\n`;
     textContent += `해설: ${w.explanation}\n\n`;
@@ -445,8 +446,8 @@ function exportAllSavedNotesAsText() {
     textContent += `결과: 총 ${note.totalQuestions}문제 중 ${note.correctAnswers}문제 정답, ${note.wrongAnswers.length}문제 오답\n\n`;
     textContent += `-----------------------------------\n\n`;
     
-    note.wrongAnswers.forEach((w, idx) => {
-      textContent += `Q${idx + 1}. ${w.question}\n`;
+    note.wrongAnswers.forEach((w) => {
+      textContent += `${w.questionNumber || 'Q'}번. ${w.question}\n`;
       textContent += `당신의 답: (${w.yourAnswerNumber}번) ${w.yourAnswer}\n`;
       textContent += `정답: (${w.correctAnswerNumber}번) ${w.correctAnswer}\n`;
       textContent += `해설: ${w.explanation}\n\n`;
