@@ -22,12 +22,6 @@ function showYearSelect() {
     <button onclick="selectYear('2022')">2022년도</button>
     <button onclick="selectYear('2021')">2021년도</button>
     <button onclick="selectYear('2020')">2020년도</button>
-    <button onclick="selectYear('2019')">2019년도</button>
-    <button onclick="selectYear('2018')">2018년도</button>
-    <button onclick="selectYear('2017')">2017년도</button>
-    <button onclick="selectYear('2016')">2016년도</button>
-    <button onclick="selectYear('2015')">2015년도</button>
-    <button onclick="selectYear('2014')">2014년도</button>
     <div class="button-row">
       <button onclick="showSavedWrongAnswers()">저장된 오답노트 보기</button>
     </div>
